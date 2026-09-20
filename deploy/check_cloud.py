@@ -24,8 +24,10 @@ def _app_url() -> str:
 
 
 BASE = _app_url().strip().rstrip("/")
-ENV = Path(os.environ.get("HERMES_PROFILE_DIR", "~/.hermes/profiles/nutrition")).expanduser() / ".env"
-values = dict(line.strip().split("=", 1) for line in ENV.read_text().splitlines() if "=" in line and not line.startswith("#"))
+ENV = Path(os.environ.get("NUTRI_CLOUD_ENV") or Path(__file__).with_name("cloud.env"))
+values = dict(line.strip().split("=", 1) for line in ENV.read_text().splitlines()
+              if "=" in line and not line.strip().startswith("#")) if ENV.exists() else {}
+values = {**values, **{k: v for k, v in os.environ.items() if k.startswith(("TELEGRAM_", "NUTRI_"))}}
 TOKEN = values["TELEGRAM_BOT_TOKEN"].strip("\"'")
 USER_ID = int(values["TELEGRAM_ALLOWED_USERS"].strip("\"'").split(",")[0])
 TEST_DATE = "01.01.2030"
