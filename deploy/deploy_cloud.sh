@@ -22,11 +22,7 @@ BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
 [ -n "$ALLOWED" ] || { echo "TELEGRAM_ALLOWED_USERS не задан: в приложение никого нельзя будет пустить"; exit 1; }
 [ -n "$BOT_TOKEN" ] || { echo "TELEGRAM_BOT_TOKEN не задан: без него не проверить подпись Telegram"; exit 1; }
 [ -f "$SA_KEY" ] || { echo "нет ключа служебного Google-аккаунта: $SA_KEY"; exit 1; }
-env_value() { case "$1" in TELEGRAM_BOT_TOKEN) printf '%s' "$BOT_TOKEN" ;; TELEGRAM_ALLOWED_USERS) printf '%s' "$ALLOWED" ;; *) printf '' ;; esac; }
 SERVICE_ACCOUNT_ID="$($YC iam service-account get "${NUTRI_YC_SERVICE_ACCOUNT:-hermes-agent}" --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')"
-SPREADSHEET_ID="$(env_value NUTRI_SPREADSHEET_ID)"
-ALLOWED="$(env_value TELEGRAM_ALLOWED_USERS)"
-[ -n "$SPREADSHEET_ID" ] || { echo "NUTRI_SPREADSHEET_ID не задан в $PROFILE_ENV — приложение в Яндекс Облаке работает только с Google-таблицей"; exit 1; }
 [ -n "$ALLOWED" ] || { echo "TELEGRAM_ALLOWED_USERS is empty"; exit 1; }
 
 # 1. Secrets. Preferred home is Lockbox (USE_LOCKBOX=1), but the deploying service account needs the
@@ -36,7 +32,7 @@ SECRET_ARGS=()
 ENV_FILE=""
 if [ "${USE_LOCKBOX:-0}" = "1" ]; then
   payload() {
-    SA_KEY="$SA_KEY" BOT_TOKEN="$(env_value TELEGRAM_BOT_TOKEN)" python3 -c '
+    SA_KEY="$SA_KEY" BOT_TOKEN="$BOT_TOKEN" python3 -c '
 import json, os
 print(json.dumps([{"key": "GOOGLE_SA_KEY", "text_value": open(os.environ["SA_KEY"]).read()},
                   {"key": "TELEGRAM_BOT_TOKEN", "text_value": os.environ["BOT_TOKEN"]}]))'
@@ -51,7 +47,7 @@ print(json.dumps([{"key": "GOOGLE_SA_KEY", "text_value": open(os.environ["SA_KEY
                --secret "environment-variable=TELEGRAM_BOT_TOKEN,id=$SECRET_ID,key=TELEGRAM_BOT_TOKEN")
   EXTRA_ENV=""
 else
-  EXTRA_ENV=",GOOGLE_SA_KEY_B64=$(base64 < "$SA_KEY" | tr -d '\n'),TELEGRAM_BOT_TOKEN=$(env_value TELEGRAM_BOT_TOKEN)"
+  EXTRA_ENV=",GOOGLE_SA_KEY_B64=$(base64 < "$SA_KEY" | tr -d '\n'),TELEGRAM_BOT_TOKEN=$BOT_TOKEN"
 fi
 
 # 2. The page: one self-contained index.html + fonts + a copy of Telegram's script, served from Object Storage,

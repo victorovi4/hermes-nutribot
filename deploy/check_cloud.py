@@ -10,7 +10,20 @@ import time
 import urllib.parse
 from pathlib import Path
 
-BASE = (sys.argv[1] if len(sys.argv) > 1 else Path(__file__).with_name("app-url.txt").read_text().strip()).rstrip("/")
+def _app_url() -> str:
+    if len(sys.argv) > 1:
+        return sys.argv[1]
+    if os.environ.get("NUTRI_APP_URL"):
+        return os.environ["NUTRI_APP_URL"]
+    for name in (os.environ.get("NUTRI_APP_URL_FILE", ""), "app-url.txt"):
+        if name:
+            path = Path(name) if Path(name).is_absolute() else Path(__file__).resolve().parent.parent / name
+            if path.exists():
+                return path.read_text(encoding="utf-8")
+    raise SystemExit("не знаю адрес приложения: передай его первым аргументом или задай NUTRI_APP_URL")
+
+
+BASE = _app_url().strip().rstrip("/")
 ENV = Path(os.environ.get("HERMES_PROFILE_DIR", "~/.hermes/profiles/nutrition")).expanduser() / ".env"
 values = dict(line.strip().split("=", 1) for line in ENV.read_text().splitlines() if "=" in line and not line.startswith("#"))
 TOKEN = values["TELEGRAM_BOT_TOKEN"].strip("\"'")
