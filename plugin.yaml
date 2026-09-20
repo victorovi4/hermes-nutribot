@@ -1,0 +1,9 @@
+name: nutribot
+version: 1.0.0
+description: Дневник питания в Hermes: бот считает КБЖУ и пишет в таблицу или в свою базу; в Telegram — приложение с экраном дня и статистикой
+author: Dmitry Ioffe
+provides_tools:
+  - nutrition_log
+requires_env:
+  - name: NUTRI_STORAGE
+    description: "Где хранить дневник: sqlite (своя база рядом с Hermes) или sheets (Google-таблица). Мастер «hermes nutribot setup» настроит сам"

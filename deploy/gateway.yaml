@@ -1,0 +1,45 @@
+openapi: 3.0.0
+info:
+  title: Nutribot app
+  version: 2.0.0
+paths:
+  /:
+    get:
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: __BUCKET__
+        object: index.html
+        service_account_id: __SERVICE_ACCOUNT_ID__
+  /telegram-web-app.js:
+    get:
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: __BUCKET__
+        object: telegram-web-app.js
+        service_account_id: __SERVICE_ACCOUNT_ID__
+  /fonts/{file}:
+    get:
+      parameters:
+        - name: file
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: __BUCKET__
+        object: fonts/{file}
+        service_account_id: __SERVICE_ACCOUNT_ID__
+  /api/{path+}:
+    x-yc-apigateway-any-method:
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: __FUNCTION_ID__
+        service_account_id: __SERVICE_ACCOUNT_ID__
+        payload_format_version: "0.1"

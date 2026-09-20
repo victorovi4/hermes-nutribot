@@ -1,0 +1,37 @@
+# Приложение Нутрибота на своём сервере: контейнер с приложением + Caddy, который сам берёт сертификат.
+# Заполни app.env (пример — app.env.example) и запусти: docker compose up -d
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    env_file: app.env
+    # Пишем в базу от имени владельца файла на сервере (обычно это твой пользователь, uid 1000).
+    user: "${NUTRI_UID:-1000}:${NUTRI_GID:-1000}"
+    volumes:
+      # Дневник в своей базе: монтируется ПАПКА с файлом — SQLite создаёт рядом служебные файлы.
+      # Для Google-таблицы строку можно убрать.
+      - ${NUTRI_DB_HOST_DIR:-./data}:/data
+    environment:
+      NUTRI_DB_PATH: /data/${NUTRI_DB_FILE:-nutribot.db}
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    env_file: app.env
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  caddy_data:
+  caddy_config:

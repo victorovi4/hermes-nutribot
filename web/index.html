@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Дневник питания</title>
+<link rel="stylesheet" href="app.css?v=3">
+</head>
+<body>
+<div class="app">
+  <header class="top" id="top"></header>
+  <main class="screen" id="screen"></main>
+  <nav class="tabbar" id="tabbar"></nav>
+  <div class="sheet-wrap" id="sheetWrap" hidden>
+    <div class="scrim" data-act="close"></div>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+  </div>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+<script src="app.js?v=3"></script>
+<script async src="telegram-web-app.js" onload="window.__nutriTelegramReady&&window.__nutriTelegramReady()"></script>
+</body>
+</html>

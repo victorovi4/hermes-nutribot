@@ -1,0 +1,9 @@
+__pycache__/
+.pytest_cache/
+*.key.json
+local/            # личное: ключи, выгрузки, адреса своей установки
+secrets/
+deploy/app.env
+deploy/cloud.env
+deploy/app-url.txt
+.DS_Store
