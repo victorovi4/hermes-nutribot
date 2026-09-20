@@ -191,3 +191,12 @@ def test_set_targets_writes_goals_and_reads_them_back():
     assert result["targets"]["energy"] == "2 000–2 100 ккал/день"
     assert ledger.execute(store, action="day_status", date=DATE)["targets"]["protein"] == "от 130 г"
     assert ledger.execute(store, action="set_targets", targets={})["error"] == "validation_error"
+
+
+def test_an_entry_without_a_date_lands_on_today():
+    """A new user's bot may forget the date; the diary must not keep a dateless row."""
+    store = stocked()
+    result = ledger.execute(store, action="log_food", items=[{"meal": "Ужин", "product_id": "p0000001", "quantity": 1, "unit": "штука"}],
+                            id_factory=ids(), today="21.09.2026")
+    written = store.food_rows[0][H["Дата"]]
+    assert result["success"] is True and written == ledger._today_msk() and written.count(".") == 2

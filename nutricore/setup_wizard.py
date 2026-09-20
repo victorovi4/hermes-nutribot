@@ -218,8 +218,8 @@ def doctor(home: Path) -> dict[str, Any]:
         check("цели заданы", False, f"{type(exc).__name__}: {exc}")
 
     soul = home / "SOUL.md"
-    check("правила в SOUL.md", soul.exists() and START_MARK in soul.read_text(encoding="utf-8"),
-          "блок правил не найден — запусти «hermes nutribot setup»")
+    has_rules = soul.exists() and START_MARK in soul.read_text(encoding="utf-8")
+    check("правила в SOUL.md", has_rules, "" if has_rules else "блок правил не найден — запусти «hermes nutribot setup»")
     return {"ok": all(c["ok"] for c in checks), "checks": checks}
 
 

@@ -97,6 +97,7 @@ def test_doctor_reports_each_check(tmp_path):
     setup_wizard.run(home, ask=Answers("1", "", "", "", "1"), printer=lambda *a: None)
     good = setup_wizard.doctor(home)
     assert good["ok"] is True and all(c["ok"] for c in good["checks"])
+    assert all(not c["detail"].startswith("блок правил") for c in good["checks"])   # no scary text on a passing check
     assert [c["what"] for c in good["checks"]][:3] == ["NUTRI_STORAGE", "хранилище открывается", "схема дневника"]
 
 

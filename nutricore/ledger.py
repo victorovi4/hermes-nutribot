@@ -222,6 +222,8 @@ def execute(
     """Execute one bounded, verified nutrition-ledger operation."""
     try:
         normalized_date = _date(date) if str(date or "").strip() else ""
+        if not normalized_date and action in ("log_food", "correct_food"):
+            normalized_date = _today_msk()      # a diary entry without a date is not an entry
         headers, existing = store.read_food()
         numbers = food_numbers(store, existing)
         by_number = dict(zip(numbers, existing))
