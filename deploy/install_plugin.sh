@@ -3,16 +3,16 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROFILE="${HERMES_PROFILE_DIR:-$HOME/.hermes/profiles/nutrition}"
-DEST="$PROFILE/plugins/nutrition-log"
+DEST="$PROFILE/plugins/${NUTRI_PLUGIN_DIR:-nutribot}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 if [ "${1:-}" = "--dry-run" ]; then
-  echo "would install into $DEST (backup: $PROFILE/backups/nutrition-log.$STAMP)"
+  echo "would install into $DEST (backup: $PROFILE/backups/$(basename "$DEST").$STAMP)"
   exit 0
 fi
 # Backups live outside plugins/ so Hermes never loads them as a plugin.
 mkdir -p "$PROFILE/backups"
-[ -d "$DEST" ] && cp -R "$DEST" "$PROFILE/backups/nutrition-log.$STAMP"
+[ -d "$DEST" ] && cp -R "$DEST" "$PROFILE/backups/$(basename "$DEST").$STAMP"
 rsync -a --delete --exclude __pycache__ --exclude .pytest_cache --exclude .git \
   --exclude tests --exclude local --exclude secrets --exclude migration \
   "$ROOT/" "$DEST/"
-echo "installed; backup: $PROFILE/backups/nutrition-log.$STAMP"
+echo "installed; backup: $PROFILE/backups/$(basename "$DEST").$STAMP"
