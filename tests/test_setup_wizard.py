@@ -99,6 +99,18 @@ def test_doctor_reports_each_check(tmp_path):
     assert good["ok"] is True and all(c["ok"] for c in good["checks"])
     assert all(not c["detail"].startswith("блок правил") for c in good["checks"])   # no scary text on a passing check
     assert [c["what"] for c in good["checks"]][:3] == ["NUTRI_STORAGE", "хранилище открывается", "схема дневника"]
+    assert good["checks"][-1]["detail"] == "найдены в SOUL.md"
+
+
+def test_rules_kept_in_a_profile_file_also_count(tmp_path):
+    """A profile that keeps the bot's rules in its own .hermes.md is set up correctly too."""
+    home = profile(tmp_path)
+    setup_wizard.run(home, ask=Answers("1", "", "", "", "1"), printer=lambda *a: None)
+    (home / "SOUL.md").write_text("# Бот\n", encoding="utf-8")            # rules moved out of SOUL.md…
+    assert setup_wizard.doctor(home)["ok"] is False
+    (home / ".hermes.md").write_text("Записывай еду через nutrition_log.\n", encoding="utf-8")   # …into the profile's own file
+    report = setup_wizard.doctor(home)
+    assert report["ok"] is True and report["checks"][-1]["detail"] == "найдены в .hermes.md"
 
 
 def test_export_writes_a_readable_file(tmp_path):

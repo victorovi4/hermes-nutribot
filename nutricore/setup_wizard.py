@@ -195,8 +195,10 @@ def doctor(home: Path) -> dict[str, Any]:
                  "не задано, где хранить дневник — запусти «hermes nutribot setup»" if not storage else f"хранилище: {storage}"):
         return {"ok": False, "checks": checks}
     if storage == STORAGE_SHEETS:
-        check("NUTRI_SPREADSHEET_ID", bool(env.get("NUTRI_SPREADSHEET_ID")), "не задан номер таблицы")
-        check("Google подключён", (home / "google_token.json").exists(), "нет google_token.json")
+        has_id = bool(env.get("NUTRI_SPREADSHEET_ID"))
+        check("NUTRI_SPREADSHEET_ID", has_id, "" if has_id else "не задан номер таблицы")
+        has_token = (home / "google_token.json").exists()
+        check("Google подключён", has_token, "" if has_token else "нет google_token.json — подключи Google командой hermes auth")
 
     try:
         store = open_store(env)
@@ -217,9 +219,14 @@ def doctor(home: Path) -> dict[str, Any]:
     except Exception as exc:
         check("цели заданы", False, f"{type(exc).__name__}: {exc}")
 
-    soul = home / "SOUL.md"
-    has_rules = soul.exists() and START_MARK in soul.read_text(encoding="utf-8")
-    check("правила в SOUL.md", has_rules, "" if has_rules else "блок правил не найден — запусти «hermes nutribot setup»")
+    # The rules normally live in SOUL.md, but a profile may keep them in its own .hermes.md — both count.
+    places = [home / "SOUL.md", home / ".hermes.md", home / "HERMES.md"]
+    texts = {path.name: path.read_text(encoding="utf-8") for path in places if path.exists()}
+    marked = [name for name, text in texts.items() if START_MARK in text]
+    own = [name for name, text in texts.items() if "nutrition_log" in text]
+    where = marked or own
+    check("правила для бота", bool(where),
+          f"найдены в {', '.join(where)}" if where else "не найдены — запусти «hermes nutribot setup»")
     return {"ok": all(c["ok"] for c in checks), "checks": checks}
 
 
