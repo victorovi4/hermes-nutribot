@@ -1,6 +1,6 @@
 name: nutribot
 version: 1.0.0
-description: Дневник питания в Hermes: бот считает КБЖУ и пишет в таблицу или в свою базу; в Telegram — приложение с экраном дня и статистикой
+description: "Дневник питания: бот считает КБЖУ и ведёт дневник в своей базе или Google-таблице, плюс приложение в Telegram"
 author: Dmitry Ioffe
 provides_tools:
   - nutrition_log

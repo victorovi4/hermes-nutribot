@@ -125,3 +125,13 @@ def test_doctor_command_reports_and_returns_a_code(tmp_path, monkeypatch, capsys
     code = mod._cli(argparse.Namespace(command="doctor", path=""))
     out = capsys.readouterr().out
     assert code == 1 and "✗" in out and "NUTRI_STORAGE" in out
+
+
+def test_manifest_parses_and_matches_the_registered_tool():
+    """A colon inside an unquoted YAML description once broke the whole plugin — never again."""
+    import yaml
+    from pathlib import Path
+
+    manifest = yaml.safe_load((Path(__file__).resolve().parents[1] / "plugin.yaml").read_text(encoding="utf-8"))
+    assert manifest["name"] == "nutribot" and manifest["provides_tools"] == [mod.SCHEMA["name"]]
+    assert isinstance(manifest["description"], str) and manifest["version"]
